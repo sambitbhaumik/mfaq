@@ -46,8 +46,8 @@ class DataTrainingArguments:
     single_domain: bool = field(default=False)
     alpha: float = field(default=0.3)
     no_special_token: bool = field(default=False)
-    limit_valid_size: Optional[int] = field(default=1000)
-    limit_train_size: Optional[int] = field(default=1000)
+    limit_valid_size: Optional[int] = field(default=False)
+    limit_train_size: Optional[int] = field(default=False)
 
 @dataclass
 class CustomTrainingArgument(TrainingArguments):
