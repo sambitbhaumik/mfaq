@@ -17,7 +17,7 @@ from deepspeed.utils.zero_to_fp32 import load_state_dict_from_zero_checkpoint
 from accelerate.utils import DistributedType
 
 
-from para_dataloaderdataloader import IterableDataset, ValidationDataset, MonolingualDataset
+from para_dataloader import IterableDataset, ValidationDataset, MonolingualDataset
 
 
 logger = logging.getLogger(__name__)
