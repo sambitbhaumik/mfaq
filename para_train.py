@@ -17,7 +17,7 @@ from deepspeed.utils.zero_to_fp32 import load_state_dict_from_zero_checkpoint
 from accelerate.utils import DistributedType
 
 
-from para_dataloader import IterableDataset, ValidationDataset, MonolingualDataset
+from dataloader import IterableDataset, ValidationDataset, MonolingualDataset
 
 
 logger = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ class ModelArguments:
     #gradient_checkpointing: bool = field(default=False)
     hidden_dropout_prob: float = field(default=0.1)
     attention_probs_dropout_prob: float = field(default=0.1)
-    model_name_or_path: str = field(default="clips/mfaq")
+    model_name_or_path: str = field(default="xlm-roberta-base") # castorini/mdpr-tied-pft-msmarco
     config_name: Optional[str] = field(default=None)
     tokenizer_name: Optional[str] = field(default=None)
     cache_dir: Optional[str] = field(default=None)
@@ -52,7 +52,7 @@ class DataTrainingArguments:
 @dataclass
 class CustomTrainingArgument(TrainingArguments):
     distributed_softmax: bool = field(default=False)
-
+    local_rank: int = field(default=-1, metadata={"help": "Local rank for distributed training on GPUs"})
 
 def distributed_softmax(q_output, a_output, rank, world_size):
     q_list = [torch.zeros_like(q_output) for _ in range(world_size)]
@@ -151,10 +151,24 @@ def main():
         model.resize_token_embeddings(len(tokenizer), pad_to_multiple_of=8)
 
     #datasets = [load_dataset("clips/mfaq", l) for l in data_args.languages]
-    datasets = [load_from_disk("en_hr_parallel")]
+    #ld = load_from_disk("en_de_parallel")
+    ld1 = load_from_disk("fr_hr_aggr")
+    #ld2 = load_from_disk("./aggr/aggr_en_hr")
+    #ld3 = load_from_disk("./aggr/aggr_es_hr")
+    #ld4 = load_from_disk("de_hr_parallel")
+    train1 = load_from_disk("fr_hr_trans")
+    #ld = train1.train_test_split(test_size=0.3)
 
-    train_datasets = datasets[0]["train"]
-    eval_datasets = [e["test"] for e in datasets]
+    #eval_d = load_from_disk("en_hr_trans")
+    #train_split = eval_d['train']
+    #test_split = eval_d['test']
+
+    eval_datasets = [train1]
+    
+    datasets = [ld1]
+
+    train_datasets = datasets[0]["train"]#[e["train"] for e in datasets]
+    #eval_datasets = [e["test"] for e in datasets]
 
     if data_args.limit_train_size:
         train_datasets = train_datasets.select(range(data_args.limit_train_size))  # Limit the training data to 1000 rows

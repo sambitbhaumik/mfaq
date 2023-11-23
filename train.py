@@ -52,6 +52,7 @@ class DataTrainingArguments:
 @dataclass
 class CustomTrainingArgument(TrainingArguments):
     distributed_softmax: bool = field(default=False)
+    local_rank: int = field(default=-1, metadata={"help": "Local rank for distributed training on GPUs"})
 
 
 def distributed_softmax(q_output, a_output, rank, world_size):
